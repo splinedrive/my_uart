@@ -61,7 +61,6 @@ end
 
 wire start_bit_detected = rx_in_sync[2] & ~rx_in_sync[1]; /* 10 */
 
-reg error_r;
 always @(posedge clk) begin
 
     if (resetn == 1'b0) begin
@@ -91,8 +90,7 @@ always @(posedge clk) begin
                     return_state <= 2;
                     state <= 7;
                 end else begin
-                    error_r <= 1'b1;
-                    state <= 7; // error
+                    state <= 0; // idle
                 end
             end
 
@@ -106,17 +104,18 @@ always @(posedge clk) begin
             end
 
             3: begin
-                error_r <= ~rx_in_sync[2]; // stop bit must high
-
-                wait_states <= HALF_CYCLES_PER_SYMBOL -1;
-                return_state <= 0;
-                state <= 4;
+                if (~rx_in_sync[2]) begin // stop bit must high
+                    error <= 1'b1;
+                    state <= 0;
+                end else begin
+                    wait_states <= HALF_CYCLES_PER_SYMBOL -1;
+                    return_state <= 4;
+                    state <= 7;
+                end
             end
 
             4: begin
-                error <= error_r;
-                valid <= ~error_r;
-
+                valid <= 1'b1;
                 state <= 0;
             end
 
