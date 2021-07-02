@@ -86,9 +86,8 @@ always @(posedge clk) begin
 
             2: begin
                 tx_out <= 1'b1; /* stop bit */
-                ready <= 1'b1;
 
-                wait_states <= CYCLES_PER_SYMBOL;
+                wait_states <= CYCLES_PER_SYMBOL<<1;
                 return_state <= 0;
                 state <= 3;
             end
